@@ -6,6 +6,7 @@ from omegaconf import DictConfig
 from sklearn import metrics
 from sklearn.linear_model import Ridge
 from sklearn.model_selection import GridSearchCV
+from kestra import Kestra
 
 
 def load_current_data(filename: str, date_column: str):
@@ -50,6 +51,7 @@ def train_model(X_train: pd.DataFrame, y_train: pd.Series, model_params: DictCon
     grid = GridSearchCV(model, params, scoring=scorer, cv=3, verbose=3)
     grid.fit(X_train, y_train_log)
     print(f"Best params: {grid.best_params_}")
+    Kestra.outputs({"best_params": grid.best_params_})
     return grid
 
 
@@ -57,6 +59,7 @@ def evaluate_model(model: Ridge, X_test: pd.DataFrame, y_test: pd.Series):
     y_pred_log = model.predict(X_test)
     y_pred = np.expm1(y_pred_log)
     score = rmsle(y_test, y_pred)
+    Kestra.outputs({"RMSLE": score})
     print(f"RMSLE: {score}")
 
 
